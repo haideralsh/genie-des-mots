@@ -1,7 +1,6 @@
-import { Fragment, useId } from "react";
-import Input from "./Input";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import Input from "@/components/ui/Input";
 
 export default async function Home({
   searchParams,
@@ -14,8 +13,8 @@ export default async function Home({
       word: string;
       gender: string;
     }[]
-  >`SELECT Word.word, Gender.gender FROM Word 
-    JOIN Gender on Word.gender_id = Gender.id 
+  >`SELECT Word.word, Gender.gender FROM Word
+    JOIN Gender on Word.gender_id = Gender.id
     ORDER BY RANDOM() LIMIT 10;`;
 
   const words = await prisma.word.findMany({
