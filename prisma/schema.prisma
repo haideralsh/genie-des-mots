@@ -8,12 +8,14 @@ datasource db {
 }
 
 model Gender {
-  id     Int    @id
-  gender String
+  id       Int    @id
+  gender   String
+  comments Word[]
 }
 
 model Word {
-  word                 String @id
+  word                 String  @id
   gender_id            Int?
   has_silent_consonant Int?
+  gender               Gender? @relation(fields: [gender_id], references: [id])
 }
