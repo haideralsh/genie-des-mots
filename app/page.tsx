@@ -1,4 +1,4 @@
-import db from "@/lib/prisma";
+import db from "@/db";
 import { revalidatePath } from "next/cache";
 import SearchInput from "@/components/ui/SearchInput";
 
@@ -26,6 +26,7 @@ export default async function Home({
     revalidatePath("/");
   }
 
+  console.log(searchTerm);
   return (
     <main className="flex min-h-screen flex-col gap-4 p-24">
       logo.png
