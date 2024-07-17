@@ -2,6 +2,7 @@
   "name": "fr-mf",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.16.2",
+    "better-sqlite3": "^11.1.2",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",

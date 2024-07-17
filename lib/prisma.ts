@@ -1,29 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import Database from "better-sqlite3";
 import path from "path";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var cachedPrisma: PrismaClient;
-}
-
-// Workaround to find the db file in production
 const filePath = path.join(process.cwd(), "prisma/words.db");
-const config = {
-  datasources: {
-    db: {
-      url: "file:" + filePath,
-    },
-  },
-};
+const db = new Database(filePath, { fileMustExist: true });
 
-let prisma: PrismaClient;
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient(config);
-} else {
-  if (!global.cachedPrisma) {
-    global.cachedPrisma = new PrismaClient(config);
-  }
-  prisma = global.cachedPrisma;
-}
-
-export default prisma;
+export default db;

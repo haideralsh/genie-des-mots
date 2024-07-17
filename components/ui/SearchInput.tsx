@@ -1,27 +1,23 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 
 export default function Input(props: React.ComponentPropsWithoutRef<"input">) {
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
-
-      return params.toString();
-    },
-    [searchParams]
-  );
-
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.target;
+    const term = event.target.value;
+    const params = new URLSearchParams(searchParams);
 
-    router.push(pathname + "?" + createQueryString("search", value));
+    if (term) {
+      params.set("search", term);
+    } else {
+      params.delete("search");
+    }
+
+    router.replace(`${pathname}?${params.toString()}`);
   }
 
   return (
@@ -29,8 +25,8 @@ export default function Input(props: React.ComponentPropsWithoutRef<"input">) {
       className="border-2 border-gray-300 p-2 rounded-md w-full"
       type={props.type}
       placeholder={props.placeholder}
-      value={props.value}
       onChange={handleChange}
+      defaultValue={searchParams.get("search")?.toString()}
     />
   );
 }
