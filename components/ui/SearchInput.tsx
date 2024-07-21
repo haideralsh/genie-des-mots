@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 export default function Input(props: React.ComponentPropsWithoutRef<"input">) {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ export default function Input(props: React.ComponentPropsWithoutRef<"input">) {
 
   return (
     <input
-      className="border-2 border-gray-300 p-2 rounded-md w-full"
+      className="border border-neutral-300 bg-neutral-100 rounded focus-visible:border-neutral-500 p-2 w-full outline-none"
       type={props.type}
       placeholder={props.placeholder}
       onChange={handleChange}

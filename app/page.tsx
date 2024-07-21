@@ -1,6 +1,7 @@
 import db from "@/db";
 import { revalidatePath } from "next/cache";
 import SearchInput from "@/components/ui/SearchInput";
+import WordList, { MF, Word } from "@/components/ui/Words";
 
 export default async function Home({
   searchParams,
@@ -9,54 +10,50 @@ export default async function Home({
 }) {
   const searchTerm = searchParams.search;
 
-  const row = db
-    .prepare(
-      "SELECT Word.word, Gender.gender FROM Word JOIN Gender on Word.gender_id = Gender.id ORDER BY RANDOM() LIMIT 10",
-    )
-    .all();
+  // @todo fix the search term bug
+  console.log("searchTerm", searchTerm);
 
-  const words = db
-    .prepare(
-      "SELECT Word.word, Gender.gender FROM Word JOIN Gender on Word.gender_id = Gender.id WHERE Word.word LIKE ? LIMIT 10",
-    )
-    .all(`${searchTerm}%`);
+  let results = [];
+
+  if (searchTerm) {
+    results = db
+      .prepare<string, Word>(
+        "SELECT word, gender FROM words WHERE word LIKE ? LIMIT 10"
+      )
+      .all(`${searchTerm}%`);
+  } else {
+    results = db
+      .prepare<[], Word>(
+        "SELECT word, gender FROM words ORDER BY RANDOM() LIMIT 10"
+      )
+      .all();
+  }
 
   async function revalidatePage() {
     "use server";
     revalidatePath("/");
   }
 
-  console.log(searchTerm);
   return (
-    <main className="flex min-h-screen flex-col gap-4 p-24">
-      logo.png
+    <main className="flex min-h-screen flex-col gap-4 p-4 max-w-md m-auto">
+      <MF />
       <SearchInput />
       {searchTerm ? (
         <>
-          <h2 className="text-lg">Words starting with "{searchTerm}"</h2>
-          {words.map(({ word, gender }: any, index: number) => (
-            <p key={word} className="bg-gray-100 p-4 rounded-md ">
-              <span className="text-sm text-gray-400 pr-4">{index + 1}</span>{" "}
-              {word} {gender}
-            </p>
-          ))}
+          <ResultHeading>
+            {results.length > 0
+              ? `Mots commençant par « ${searchTerm} »`
+              : `Aucun mot trouvé commençant par « ${searchTerm} »`}
+          </ResultHeading>
+          <WordList searchTerm={searchTerm} words={results} />
         </>
       ) : (
         <>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg">Random words</h2>
-
-            <form action={revalidatePage}>
-              <RandomizeButton />
-            </form>
-          </div>
-          {row &&
-            row.map(({ word, gender }: any, index: number) => (
-              <p key={word} className="bg-gray-100 p-4 rounded-md ">
-                <span className="text-sm text-gray-400 pr-4">{index + 1}</span>{" "}
-                {word} {gender}
-              </p>
-            ))}
+          <form className="flex items-center gap-1 " action={revalidatePage}>
+            <ResultHeading>Mots aléatoires</ResultHeading>
+            <RandomizeButton />
+          </form>
+          <WordList words={results} />
         </>
       )}
     </main>
@@ -65,10 +62,10 @@ export default async function Home({
 
 function RandomizeButton() {
   return (
-    <button className="outline-offset-4 rounded-full">
+    <button className="outline-offset-4 rounded-full text-gray-500">
       <svg
-        width="20"
-        height="20"
+        width="15"
+        height="15"
         viewBox="0 0 15 15"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -82,4 +79,8 @@ function RandomizeButton() {
       </svg>
     </button>
   );
+}
+
+function ResultHeading(props: { children: string }) {
+  return <h2 className="text-sm text-gray-500">{props.children}</h2>;
 }
