@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import SearchInput from "@/components/ui/SearchInput";
 import localFont from "next/font/local";
 import WordList from "@/components/ui/Words";
-import { Suspense } from "react";
 
 const syne = localFont({ src: "../fonts/Syne ExtraBold.woff2" });
 
@@ -29,7 +28,7 @@ export default async function Home({
 
   if (searchTerm) {
     results = db
-      .prepare<string, Result>(
+      .prepare<[string, number], Result>(
         `SELECT
           w.word,
           GROUP_CONCAT(DISTINCT p.name) AS properties,
@@ -50,13 +49,13 @@ export default async function Home({
           w.word
       ORDER BY
           w.word
-      LIMIT ${RESULTS_LIMIT};
+      LIMIT ?;
 `,
       )
-      .all(`${searchTerm}%`);
+      .all(`${searchTerm}%`, RESULTS_LIMIT);
   } else {
     results = db
-      .prepare<[], Result>(
+      .prepare<[number], Result>(
         `SELECT
                 w.word,
                 GROUP_CONCAT(DISTINCT p.name) AS properties,
@@ -75,10 +74,10 @@ export default async function Home({
                 w.word
             ORDER BY
                 RANDOM()
-            LIMIT ${RESULTS_LIMIT};
+            LIMIT ?;
       `,
       )
-      .all();
+      .all(RESULTS_LIMIT);
   }
 
   async function revalidatePage() {
@@ -89,13 +88,17 @@ export default async function Home({
   results = results.map((result) => {
     return {
       word: result.word,
-      properties: result.properties.split(","),
-      types: result.types.split(","),
+      isMasculine: result.properties.includes("masculin"),
+      isFeminine: result.properties.includes("féminin"),
+      isSingular: result.properties.includes("singulier"),
+      isPlural: result.properties.includes("pluriel"),
+      isNoun: result.types.includes("Noms communs"),
+      isAdjective: result.types.includes("Adjectifs"),
     };
   });
 
   return (
-    <div className="max-w-5xl mx-auto p-4 flex flex-col md:flex-row gap-5">
+    <div className="max-w-5xl mx-auto p-4 flex flex-col md:flex-row gap-5 md:pt-10">
       <div className="md:w-1/3 md:mb-0 space-y-4">
         <h1
           className={`text-xl uppercase text-[#53195D] leading-4 ${syne.className}`}
@@ -118,9 +121,11 @@ export default async function Home({
               </ResultHeading>
               <WordList searchTerm={searchTerm} words={results} />
               {results.length === RESULTS_LIMIT && (
-                <p className="text-sm text-[#8E8C99]">
-                  Affichage de {RESULTS_LIMIT} résultats parmi plusieurs
-                </p>
+                <>
+                  <p className="text-sm text-[#8E8C99]">
+                    Affichage de {RESULTS_LIMIT} résultats parmi plusieurs
+                  </p>
+                </>
               )}
             </>
           ) : (
