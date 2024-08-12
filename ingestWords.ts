@@ -1,3 +1,13 @@
+/**
+ * This script is not required for the application to work. It is to be used inside the vocabulaire-francais repository
+ * to create the words.sqlite database file from scratch found inside the db folder used by the app.
+ *
+ *
+ * Pre-requisites:
+ * 1. [Bun](https://bun.sh) version 1.1.20 or higher
+ * 2. [vocabulaire-francais](https://github.com/akaAgar/vocabulaire-francais/tree/master?tab=readme-ov-file) repository
+ */
+
 import { Database } from "bun:sqlite";
 import { readFile } from "fs/promises";
 
@@ -56,42 +66,39 @@ const insertWord = db.transaction(
       wordResult.changes > 0
         ? wordResult.lastInsertRowid
         : db
-            .prepare<
-              { id: RowId },
-              string
-            >("SELECT id FROM WORDS WHERE word = ?")
+            .prepare<{ id: RowId }, string>(
+              "SELECT id FROM WORDS WHERE word = ?"
+            )
             .get(word)!.id;
 
     const existingType = db
-      .prepare<
-        { id: RowId },
-        { wordId: RowId; typeId: RowId }
-      >("SELECT id FROM WORD_TYPE_ASSIGNMENTS WHERE word_id = ? AND word_type_id = ?")
+      .prepare<{ id: RowId }, { wordId: RowId; typeId: RowId }>(
+        "SELECT id FROM WORD_TYPE_ASSIGNMENTS WHERE word_id = ? AND word_type_id = ?"
+      )
       .get({ wordId, typeId });
 
     if (!existingType) {
       console.log("inserting missing type");
       db.prepare(
-        "INSERT INTO WORD_TYPE_ASSIGNMENTS (word_id, word_type_id) VALUES (?, ?)",
+        "INSERT INTO WORD_TYPE_ASSIGNMENTS (word_id, word_type_id) VALUES (?, ?)"
       ).run(wordId, typeId);
     }
 
     propertyIds.forEach((propertyId) => {
       const existingProperty = db
-        .prepare<
-          { id: RowId },
-          { wordId: RowId; propertyId: RowId }
-        >("SELECT id FROM WORD_PROPERTIES WHERE word_id = ? AND property_id = ?")
+        .prepare<{ id: RowId }, { wordId: RowId; propertyId: RowId }>(
+          "SELECT id FROM WORD_PROPERTIES WHERE word_id = ? AND property_id = ?"
+        )
         .get({ wordId, propertyId });
 
       if (!existingProperty) {
         console.log("inserting missing property");
         db.prepare(
-          "INSERT INTO WORD_PROPERTIES (word_id, property_id) VALUES (?, ?)",
+          "INSERT INTO WORD_PROPERTIES (word_id, property_id) VALUES (?, ?)"
         ).run(wordId, propertyId);
       }
     });
-  },
+  }
 );
 
 const processFile = async (content: string, attributes: Attributes) => {
@@ -124,7 +131,7 @@ const main = async () => {
     console.log({ properties, type });
 
     const propertyStmt = db.prepare(
-      "INSERT OR IGNORE INTO PROPERTIES (name) VALUES (?)",
+      "INSERT OR IGNORE INTO PROPERTIES (name) VALUES (?)"
     );
 
     const propertyIds = properties.map((property) => {
@@ -136,16 +143,15 @@ const main = async () => {
       } else {
         console.log("property found", property);
         return db
-          .prepare<
-            { id: number },
-            string
-          >("SELECT id FROM PROPERTIES WHERE name = ?")
+          .prepare<{ id: number }, string>(
+            "SELECT id FROM PROPERTIES WHERE name = ?"
+          )
           .get(property)!.id;
       }
     });
 
     const typeStmt = db.prepare(
-      "INSERT OR IGNORE INTO WORD_TYPES (name) VALUES (?)",
+      "INSERT OR IGNORE INTO WORD_TYPES (name) VALUES (?)"
     );
 
     const transaction = typeStmt.run(type);
@@ -154,10 +160,9 @@ const main = async () => {
       transaction.changes > 0
         ? transaction.lastInsertRowid
         : db
-            .prepare<
-              { id: number },
-              string
-            >("SELECT id FROM WORD_TYPES WHERE name = ?")
+            .prepare<{ id: number }, string>(
+              "SELECT id FROM WORD_TYPES WHERE name = ?"
+            )
             .get(type)!.id;
 
     await processFile(content, { propertyIds, typeId });
