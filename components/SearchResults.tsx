@@ -1,6 +1,7 @@
 import WordList from "./ResultList";
 import ResultHeading from "./ResultHeading";
-import db, { DatabaseResult, processResults, RESULTS_LIMIT } from "@/db";
+import db from "@/db";
+import { DatabaseResult, mapResult, RESULTS_LIMIT } from "@/db/lib";
 
 interface Props {
   searchTerm: string;
@@ -29,11 +30,10 @@ export default function SearchResults({ searchTerm }: Props) {
           w.word
       ORDER BY
           w.word
-      LIMIT ?;
-`
+      LIMIT ?;`,
     )
     .all(`${searchTerm}%`, RESULTS_LIMIT)
-    .map(processResults);
+    .map(mapResult);
 
   return (
     <>

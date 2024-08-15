@@ -1,4 +1,5 @@
-import db, { DatabaseResult, processResults, RESULTS_LIMIT } from "@/db";
+import { DatabaseResult, mapResult, RESULTS_LIMIT } from "@/db/lib";
+import db from "@/db";
 import { RandomizeIcon } from "./icons";
 import ResultHeading from "./ResultHeading";
 import ResultList from "./ResultList";
@@ -13,28 +14,27 @@ export default function DefaultResults() {
   const results = db
     .prepare<[number], DatabaseResult>(
       `SELECT
-              w.word,
-              GROUP_CONCAT(DISTINCT p.name) AS properties,
-              GROUP_CONCAT(DISTINCT wt.name) as types
-          FROM
-              WORDS w
-                  LEFT JOIN
-              WORD_PROPERTIES wp ON w.id = wp.word_id
-                  LEFT JOIN
-              PROPERTIES p ON wp.property_id = p.id
-                  LEFT JOIN
-              WORD_TYPE_ASSIGNMENTS wta ON w.id = wta.word_id
-                  LEFT JOIN
-              WORD_TYPES wt ON wta.word_type_id = wt.id
-          GROUP BY
-              w.word
-          ORDER BY
-              RANDOM()
-          LIMIT ?;
-    `
+            w.word,
+            GROUP_CONCAT(DISTINCT p.name) AS properties,
+            GROUP_CONCAT(DISTINCT wt.name) as types
+      FROM
+          WORDS w
+              LEFT JOIN
+          WORD_PROPERTIES wp ON w.id = wp.word_id
+              LEFT JOIN
+          PROPERTIES p ON wp.property_id = p.id
+              LEFT JOIN
+          WORD_TYPE_ASSIGNMENTS wta ON w.id = wta.word_id
+              LEFT JOIN
+          WORD_TYPES wt ON wta.word_type_id = wt.id
+      GROUP BY
+          w.word
+      ORDER BY
+          RANDOM()
+      LIMIT ?;`,
     )
     .all(RESULTS_LIMIT)
-    .map(processResults);
+    .map(mapResult);
 
   return (
     <>

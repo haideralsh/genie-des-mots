@@ -9,7 +9,7 @@ import {
   SIcon,
   SOuPIcon,
 } from "@/components/icons";
-import { Result } from "@/db";
+import { Result } from "@/db/lib";
 import { Libre_Baskerville } from "next/font/google";
 
 interface Props {
