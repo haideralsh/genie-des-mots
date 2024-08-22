@@ -5,7 +5,7 @@ import ResultHeading from "./ResultHeading";
 import ResultList from "./ResultList";
 import { revalidatePath } from "next/cache";
 
-export default function DefaultResults() {
+export default async function DefaultResults() {
   async function revalidatePage() {
     "use server";
     revalidatePath("/");

@@ -7,7 +7,7 @@ interface Props {
   searchTerm: string;
 }
 
-export default function SearchResults({ searchTerm }: Props) {
+export default async function SearchResults({ searchTerm }: Props) {
   const results = db
     .prepare<[string, number], DatabaseResult>(
       `SELECT

@@ -3,6 +3,7 @@ import SearchResults from "@/components/SearchResults";
 import Logo from "@/components/Logo";
 import DefaultResults from "@/components/DefaultResults";
 import { revalidatePath } from "next/cache";
+import { Suspense } from "react";
 
 export default async function Home({
   searchParams,
@@ -27,11 +28,13 @@ export default async function Home({
       </div>
       <main className="md:w-2/3 bg-[#FDFCFD] p-4 rounded-2xl shadow-2xl shadow-[#DBD8E0] text-[#402060]">
         <div className="space-y-2">
-          {searchTerm ? (
-            <SearchResults searchTerm={searchTerm} />
-          ) : (
-            <DefaultResults />
-          )}
+          <Suspense fallback={<div>Chargement...</div>}>
+            {searchTerm ? (
+              <SearchResults searchTerm={searchTerm} />
+            ) : (
+              <DefaultResults />
+            )}
+          </Suspense>
         </div>
       </main>
     </div>
