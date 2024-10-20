@@ -1,3 +1,3 @@
 # Génie des Mots
 
-Une application qui vous permet de rechercher des mots en français et de connaître leur nature grammaticale : nom, adjectif, masculin, féminin, singulier ou pluriel.
+> An application that allows you to search for French words and know their grammatical nature: noun, adjective, masculine, feminine, singular or plural.
