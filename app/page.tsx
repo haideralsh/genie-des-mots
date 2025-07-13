@@ -5,11 +5,12 @@ import DefaultResults from "@/components/DefaultResults";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { search?: string };
-}) {
+export default async function Home(
+  props: {
+    searchParams: Promise<{ search?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const searchTerm = searchParams.search;
 
   async function revalidate() {
