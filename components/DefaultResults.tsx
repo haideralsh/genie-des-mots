@@ -1,47 +1,47 @@
-import { DatabaseResult, mapResult, RESULTS_LIMIT } from "@/db/lib";
-import db from "@/db";
-import { RandomizeIcon } from "./icons";
+"use client";
+
+import { RandomizeIcon } from "./svgs";
 import ResultHeading from "./ResultHeading";
 import ResultList from "./ResultList";
-import { revalidatePage } from "./revalidatePage";
+import type { Result } from "@/db/lib";
+import { useTransition, useState } from "react";
 
-export default async function DefaultResults() {
-  const results = db
-    .prepare<[number], DatabaseResult>(
-      `SELECT
-            w.word,
-            GROUP_CONCAT(DISTINCT p.name) AS properties,
-            GROUP_CONCAT(DISTINCT wt.name) as types
-      FROM
-          WORDS w
-              LEFT JOIN
-          WORD_PROPERTIES wp ON w.id = wp.word_id
-              LEFT JOIN
-          PROPERTIES p ON wp.property_id = p.id
-              LEFT JOIN
-          WORD_TYPE_ASSIGNMENTS wta ON w.id = wta.word_id
-              LEFT JOIN
-          WORD_TYPES wt ON wta.word_type_id = wt.id
-      GROUP BY
-          w.word
-      ORDER BY
-          RANDOM()
-      LIMIT ?;`,
-    )
-    .all(RESULTS_LIMIT)
-    .map(mapResult);
+interface DefaultResultsProps {
+  initialResults: Result[];
+  refreshAction: () => Promise<Result[]>;
+}
+
+export default function DefaultResults({
+  initialResults,
+  refreshAction,
+}: DefaultResultsProps) {
+  const [results, setResults] = useState<Result[]>(initialResults);
+  const [isPending, startTransition] = useTransition();
+
+  const handleRefresh = () => {
+    startTransition(async () => {
+      const newResults = await refreshAction();
+      setResults(newResults);
+    });
+  };
 
   return (
     <>
-      <form action={revalidatePage}>
+      <form action={handleRefresh}>
         <div className="flex items-center gap-2">
           <ResultHeading>Mots aléatoires</ResultHeading>
-          <button className="transition-colors rounded-full hover:bg-[#EAE7EC] hover:text-[#53195D] text-[#8E8C99] p-1.5 -m-1.5 ">
+          <button
+            type="submit"
+            disabled={isPending}
+            className="transition-colors rounded-full hover:bg-[#EAE7EC] hover:text-[#53195D] text-[#8E8C99] p-1.5 -m-1.5 disabled:opacity-50"
+          >
             <RandomizeIcon />
           </button>
         </div>
       </form>
-      <ResultList results={results} />
+      <div className={isPending ? "opacity-50 transition-opacity" : ""}>
+        <ResultList results={results} />
+      </div>
     </>
   );
 }

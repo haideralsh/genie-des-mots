@@ -2,12 +2,12 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef } from "react";
-import { ClearIcon, MagnifyingGlass } from "./icons";
+import { ClearIcon, MagnifyingGlass } from "./svgs";
 
 export default function Input(
   props: React.ComponentPropsWithoutRef<"input"> & {
-    revalidate: () => Promise<void>;
-  }
+    revalidate?: () => Promise<void>;
+  },
 ) {
   const pathname = usePathname();
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function Input(
       params.set("search", term);
     } else {
       params.delete("search");
-      props.revalidate();
+      props.revalidate?.();
     }
 
     router.replace(`${pathname}?${params.toString()}`);
@@ -35,7 +35,7 @@ export default function Input(
 
     const params = new URLSearchParams(searchParams);
     params.delete("search");
-    props.revalidate();
+    props.revalidate?.();
     router.replace(`${pathname}?${params.toString()}`);
   }
 

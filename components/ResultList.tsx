@@ -8,7 +8,7 @@ import {
   PIcon,
   SIcon,
   SOuPIcon,
-} from "@/components/icons";
+} from "@/components/svgs";
 import { Result } from "@/db/lib";
 import { Libre_Baskerville } from "next/font/google";
 
